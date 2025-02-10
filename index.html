@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queueing Theory Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #282c34;
+      color: #ffffff;
+      position: relative;
+    }
+    .container {
+      max-width: 400px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 20px;
+      background: #333;
+      border: 3px solid #444;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+      text-align: center;
+      position: relative;
+    }
+    h1, h2 {
+      font-size: 1.5em;
+      text-align: center;
+    }
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo img {
+      display: block;
+      margin: 0 auto;
+      max-width: 80px;
+      border-radius: 8px;
+    }
+    /* Home button now has space from the top left of the container */
+    .home-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      text-decoration: none;
+      background: #444;
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="https://jvinlopez.github.io/excellix/" class="home-button" title="Home">🏠</a>
+    <div class="logo">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhp3VrJcYLqPjT3fqtguwljuRFKfUzEtxam1T8dacAkDQIybluvRygnnW1WgY6hEr8Xdck-zrKpmoUbkqYwcv3TH7bdddYBIQMOY3CpsSm9ulcgQ_FLQyAkyhtfcujjIl1Q5Txm98pxyNNCFLHvQKM_9Iiha5a3Dc6wLO0wGrUYgfXb46JJfeOdXYqjBfI/s1600/excellix.jpg" alt="Queueing Tool Logo">
+    </div>
+    <h1>Queueing Theory Calculator</h1>
+    
+    <!-- Queueing Model Selection -->
+    <div class="input-group">
+      <label for="model">Queueing Model:</label>
+      <select id="model" onchange="toggleServers()">
+        <option value="mm1">M/M/1</option>
+        <option value="mms">M/M/s</option>
+      </select>
+    </div>
+    
+    <!-- Cost Analysis Selection -->
+    <div class="input-group">
+      <label for="cost">Cost Analysis:</label>
+      <select id="cost" onchange="toggleCostFields()">
+        <option value="no">No Costs</option>
+        <option value="yes">Use Costs</option>
+      </select>
+    </div>
+    
+    <!-- Additional Cost Fields (hidden by default) -->
+    <div id="cost-fields" style="display: none;">
+      <div class="input-group">
+        <label for="serverCost">Server Cost per Time Unit:</label>
+        <input type="number" id="serverCost" placeholder="Enter server cost per time">
+      </div>
+      <div class="input-group">
+        <label for="waitingCost">Waiting Cost per Time Unit:</label>
+        <input type="number" id="waitingCost" placeholder="Enter waiting cost per time">
+      </div>
+    </div>
+    
+    <!-- Time Unit Selection -->
+    <div class="input-group">
+      <label for="timeUnit">Time Unit:</label>
+      <select id="timeUnit">
+        <option value="seconds">Seconds</option>
+        <option value="minutes">Minutes</option>
+        <option value="hours">Hours</option>
+        <option value="days">Days</option>
+        <option value="weeks">Weeks</option>
+        <option value="months">Months</option>
+        <option value="quarter">Quarter</option>
+        <option value="years">Years</option>
+      </select>
+    </div>
+    
+    <!-- Arrival and Service Rates -->
+    <div class="input-group">
+      <label for="lambda">Arrival Rate (λ):</label>
+      <input type="number" id="lambda" placeholder="Enter λ">
+    </div>
+    <div class="input-group">
+      <label for="mu">Service Rate (μ):</label>
+      <input type="number" id="mu" placeholder="Enter μ">
+    </div>
+    
+    <!-- Number of Servers for M/M/s -->
+    <div class="input-group" id="servers-group" style="display: none;">
+      <label for="servers">Number of Servers (s):</label>
+      <input type="number" id="servers" placeholder="Enter s">
+    </div>
+    
+    <!-- Probability for n customers -->
+    <div class="input-group">
+      <label for="customers">Probability of queue with _ customers (Pₙ):</label>
+      <input type="number" id="customers" placeholder="Enter number of customers">
+    </div>
+    
+    <button class="button" onclick="calculateQueue()">Calculate</button>
+    
+    <!-- Results -->
+    <div id="results" style="display: none; margin-top: 20px; text-align: left;">
+      <h2>Results</h2>
+      <p id="utilization"></p>
+      <p id="queueLength"></p>
+      <p id="waitingTime"></p>
+      <p id="avgCustomers"></p>
+      <p id="avgTime"></p>
+      <p id="probZero"></p>
+      <p id="probN"></p>
+      <p id="serverCostResult" style="display:none;"></p>
+      <p id="waitingCostResult" style="display:none;"></p>
+      <p id="totalCost" style="display:none;"></p>
+    </div>
+  </div>
+  
+  <script>
+    // Toggle display for the number of servers (only for M/M/s)
+    function toggleServers() {
+      const model = document.getElementById('model').value;
+      const serversGroup = document.getElementById('servers-group');
+      serversGroup.style.display = (model === 'mms') ? 'block' : 'none';
+    }
+    
+    // Toggle display for cost input fields based on the Cost Analysis selection
+    function toggleCostFields() {
+      const costAnalysis = document.getElementById('cost').value;
+      const costFields = document.getElementById('cost-fields');
+      costFields.style.display = (costAnalysis === 'yes') ? 'block' : 'none';
+    }
+    
+    // Main calculation function
+    function calculateQueue() {
+      // Read basic inputs
+      const lambda = parseFloat(document.getElementById('lambda').value);
+      const mu = parseFloat(document.getElementById('mu').value);
+      const model = document.getElementById('model').value;
+      const timeUnit = document.getElementById('timeUnit').value;
+      const costAnalysis = document.getElementById('cost').value;
+      
+      let utilization, queueLength, waitingTime, avgCustomers, avgTime, probZero, probN;
+      let serverCostTotal = 0, waitingCostTotal = 0, totalCost = 0;
+      
+      if (isNaN(lambda) || isNaN(mu) || lambda <= 0 || mu <= 0) {
+        alert("Please enter valid positive numbers for λ and μ");
+        return;
+      }
+      
+      if (model === 'mm1') {
+        utilization = lambda / mu;
+        if (utilization >= 1) {
+          alert("System is unstable (λ ≥ μ). Please enter values such that λ < μ.");
+          return;
+        }
+        // For M/M/1: Average Queue Length (L<sub>q</sub>) = ρ²/(1-ρ)
+        queueLength = (utilization * utilization) / (1 - utilization);
+        waitingTime = queueLength / lambda;
+        avgCustomers = queueLength;
+        avgTime = waitingTime;
+        probZero = 1 - utilization;
+      } else if (model === 'mms') {
+        const s = parseInt(document.getElementById('servers').value);
+        if (isNaN(s) || s <= 0) {
+          alert("Please enter a valid number of servers");
+          return;
+        }
+        utilization = lambda / (s * mu);
+        if (utilization >= 1) {
+          alert("System is unstable (λ ≥ s×μ). Please enter values such that λ < s×μ.");
+          return;
+        }
+        // Placeholder calculations for M/M/s:
+        queueLength = utilization * 10; // Simplified placeholder formula
+        waitingTime = queueLength / lambda;
+        avgCustomers = queueLength;
+        avgTime = waitingTime;
+        probZero = 1 - utilization;
+      }
+      
+      // Calculate probability for n customers (Pₙ) assuming a simplified model
+      const n = parseInt(document.getElementById('customers').value);
+      if (!isNaN(n) && n >= 0) {
+        probN = Math.pow(utilization, n) * (1 - utilization);
+      } else {
+        probN = "Invalid input for n";
+      }
+      
+      // If cost analysis is enabled, calculate cost results
+      if (costAnalysis === 'yes') {
+        const serverCost = parseFloat(document.getElementById('serverCost').value);
+        const waitingCost = parseFloat(document.getElementById('waitingCost').value);
+        if (isNaN(serverCost) || serverCost < 0) {
+          alert("Please enter a valid non-negative number for server cost");
+          return;
+        }
+        if (isNaN(waitingCost) || waitingCost < 0) {
+          alert("Please enter a valid non-negative number for waiting cost");
+          return;
+        }
+        // For M/M/1, assume one server; for M/M/s, multiply by the number of servers.
+        if (model === 'mm1') {
+          serverCostTotal = serverCost * 1;
+        } else if (model === 'mms') {
+          const s = parseInt(document.getElementById('servers').value);
+          serverCostTotal = serverCost * s;
+        }
+        waitingCostTotal = waitingCost * queueLength;
+        totalCost = serverCostTotal + waitingCostTotal;
+      }
+      
+      // Display results with symbols and formatting
+      document.getElementById('utilization').textContent = "Utilization (ρ): " + utilization.toFixed(2);
+      document.getElementById('queueLength').innerHTML = "Average Queue Length (L<sub>q</sub>): " + queueLength.toFixed(2);
+      document.getElementById('waitingTime').innerHTML = "Average Waiting Time (W<sub>q</sub>): " + waitingTime.toFixed(2);
+      document.getElementById('avgCustomers').innerHTML = "Average Number of Customers (L): " + avgCustomers.toFixed(2);
+      document.getElementById('avgTime').innerHTML = "Average Time in System (W): " + avgTime.toFixed(2);
+      // Convert probabilities to percent with 2 decimal places
+      document.getElementById('probZero').textContent = "Probability of 0 Customers (P₀): " + (probZero * 100).toFixed(2) + "%";
+      document.getElementById('probN').textContent = "Probability of " + n + " Customers (Pₙ): " +
+        (typeof(probN) === "number" ? (probN * 100).toFixed(2) + "%" : probN);
+      
+      // Display cost results if applicable
+      if (costAnalysis === 'yes') {
+        document.getElementById('serverCostResult').textContent = "Server Cost: " + serverCostTotal.toFixed(2) + " per " + timeUnit;
+        document.getElementById('waitingCostResult').textContent = "Waiting Cost: " + waitingCostTotal.toFixed(2) + " per " + timeUnit;
+        document.getElementById('totalCost').textContent = "Total Cost: " + totalCost.toFixed(2) + " per " + timeUnit;
+        document.getElementById('serverCostResult').style.display = 'block';
+        document.getElementById('waitingCostResult').style.display = 'block';
+        document.getElementById('totalCost').style.display = 'block';
+      } else {
+        document.getElementById('serverCostResult').style.display = 'none';
+        document.getElementById('waitingCostResult').style.display = 'none';
+        document.getElementById('totalCost').style.display = 'none';
+      }
+      
+      document.getElementById('results').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
