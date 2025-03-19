@@ -4,16 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Queueing Theory Tool</title>
+  <!-- Include SheetJS for Excel export functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-color: #282c34;
+      background-color: #3E4A45; /* Ash-like dark green */
       color: #ffffff;
       position: relative;
     }
@@ -22,13 +20,57 @@
       width: 100%;
       margin: 20px auto;
       padding: 20px;
-      background: #333;
-      border: 3px solid #444;
+      background: #43614F; /* Muted green shade */
+      border: 3px solid #3E4A45;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       box-sizing: border-box;
       text-align: center;
       position: relative;
+    }
+    /* Top navigation inside the container */
+    .top-icons {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .top-icons a {
+      text-decoration: none;
+      color: white;
+      font-size: 24px;
+    }
+    .menu {
+      display: none;
+      background: #444;
+      padding: 10px;
+      border-radius: 5px;
+      color: white;
+      list-style-type: none;
+      text-align: left;
+      position: absolute;
+      left: 5px; 
+      top: 50px;
+      z-index: 1000;
+    }
+    .menu li {
+      margin-bottom: 5px;
+    }
+    .menu a {
+      color: #00bfff;
+      text-decoration: none;
+    }
+    .menu a:hover {
+      text-decoration: underline;
+    }
+    /* Updated Logo using WF Wizard logo (max-width 500px) */
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo img {
+      max-width: 500px;
+      border-radius: 8px;
     }
     h1, h2 {
       font-size: 1.5em;
@@ -42,7 +84,8 @@
       display: block;
       margin-bottom: 5px;
     }
-    .input-group input, .input-group select {
+    .input-group input,
+    .input-group select {
       width: 100%;
       padding: 8px;
       border: 1px solid #555;
@@ -63,40 +106,44 @@
     .button:hover {
       background: #0056b3;
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
+    .button.reset {
+      background: #15737D;
     }
-    .logo img {
-      display: block;
-      margin: 0 auto;
-      max-width: 80px;
-      border-radius: 8px;
+    .button.reset:hover {
+      background: #c82333;
     }
-    /* Home button now has space from the top left of the container */
-    .home-button {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 24px;
-      text-decoration: none;
-      background: #444;
-      padding: 5px 10px;
-      border-radius: 5px;
-      color: white;
-      z-index: 1;
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    .button-group button {
+      flex: 1;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="https://jvinlopez.github.io/excellix/" class="home-button" title="Home">🏠</a>
+    <!-- Top navigation inside container -->
+    <div class="top-icons">
+      <a href="https://jvinlopez.github.io/excellix/" title="Home">🏠</a>
+      <a href="#" onclick="toggleMenu()" title="Menu">☰</a>
+    </div>
+    <!-- Hidden menu -->
+    <div id="menu" class="menu">
+      <ul>
+        <li><a href="https://jvinlopez.github.io/Demand-Forecasting/">Demand Forecasting</a></li>
+        <li><a href="https://jvinlopez.github.io/Queueing/">Queueing Theory</a></li>
+        <li><a href="https://jvinlopez.github.io/Correlation/">Design of Experiment Pearson</a></li>
+        <li><a href="https://jvinlopez.github.io/ANOVA/">Design of Experiment ANOVA</a></li>
+      </ul>
+    </div>
+    <!-- Logo -->
     <div class="logo">
-      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhp3VrJcYLqPjT3fqtguwljuRFKfUzEtxam1T8dacAkDQIybluvRygnnW1WgY6hEr8Xdck-zrKpmoUbkqYwcv3TH7bdddYBIQMOY3CpsSm9ulcgQ_FLQyAkyhtfcujjIl1Q5Txm98pxyNNCFLHvQKM_9Iiha5a3Dc6wLO0wGrUYgfXb46JJfeOdXYqjBfI/s1600/excellix.jpg" alt="Queueing Tool Logo">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi07AbSzwmXhHr3pP8BVrkijVXYKffzIzup2hwn4nTioAU_Tfa_RG_XDAhyOcSMP2TH-bBQpyrn5INpOubCgfQgjG5dlS3VpwuYx_MmJDI5fTSNMkPa-uAuSId5axBuhZ0Alvq0ogLzpd2ifsg26o3HLD-xEsijg1TLOfi6DRvDan6Qx6yWOGisTLnGlqk/s320/Tool%20Logo%203.png" alt="Queueing Tool Logo">
     </div>
     <h1>Queueing Theory Calculator</h1>
     
-    <!-- Queueing Model Selection -->
+    <!-- Input Groups -->
     <div class="input-group">
       <label for="model">Queueing Model:</label>
       <select id="model" onchange="toggleServers()">
@@ -104,8 +151,6 @@
         <option value="mms">M/M/s</option>
       </select>
     </div>
-    
-    <!-- Cost Analysis Selection -->
     <div class="input-group">
       <label for="cost">Cost Analysis:</label>
       <select id="cost" onchange="toggleCostFields()">
@@ -113,8 +158,7 @@
         <option value="yes">Use Costs</option>
       </select>
     </div>
-    
-    <!-- Additional Cost Fields (hidden by default) -->
+    <!-- Additional cost fields -->
     <div id="cost-fields" style="display: none;">
       <div class="input-group">
         <label for="serverCost">Server Cost per Time Unit:</label>
@@ -125,8 +169,6 @@
         <input type="number" id="waitingCost" placeholder="Enter waiting cost per time">
       </div>
     </div>
-    
-    <!-- Time Unit Selection -->
     <div class="input-group">
       <label for="timeUnit">Time Unit:</label>
       <select id="timeUnit">
@@ -140,8 +182,6 @@
         <option value="years">Years</option>
       </select>
     </div>
-    
-    <!-- Arrival and Service Rates -->
     <div class="input-group">
       <label for="lambda">Arrival Rate (λ):</label>
       <input type="number" id="lambda" placeholder="Enter λ">
@@ -150,22 +190,23 @@
       <label for="mu">Service Rate (μ):</label>
       <input type="number" id="mu" placeholder="Enter μ">
     </div>
-    
-    <!-- Number of Servers for M/M/s -->
     <div class="input-group" id="servers-group" style="display: none;">
       <label for="servers">Number of Servers (s):</label>
       <input type="number" id="servers" placeholder="Enter s">
     </div>
-    
-    <!-- Probability for n customers -->
     <div class="input-group">
-      <label for="customers">Probability of queue with _ customers (Pₙ):</label>
+      <label for="customers">Probability for n customers (Pₙ):</label>
       <input type="number" id="customers" placeholder="Enter number of customers">
     </div>
     
-    <button class="button" onclick="calculateQueue()">Calculate</button>
+    <!-- Button Group for Calculate and Reset -->
+    <div class="button-group">
+      <button class="button" onclick="calculateQueue()">Calculate</button>
+      <button class="button reset" onclick="resetAll()">Reset</button>
+    </div>
+    <button class="button" id="excelButton" onclick="extractResultsExcel()">Extract Results in Excel</button>
     
-    <!-- Results -->
+    <!-- Results Section -->
     <div id="results" style="display: none; margin-top: 20px; text-align: left;">
       <h2>Results</h2>
       <p id="utilization"></p>
@@ -182,23 +223,19 @@
   </div>
   
   <script>
-    // Toggle display for the number of servers (only for M/M/s)
     function toggleServers() {
       const model = document.getElementById('model').value;
       const serversGroup = document.getElementById('servers-group');
       serversGroup.style.display = (model === 'mms') ? 'block' : 'none';
     }
     
-    // Toggle display for cost input fields based on the Cost Analysis selection
     function toggleCostFields() {
       const costAnalysis = document.getElementById('cost').value;
       const costFields = document.getElementById('cost-fields');
       costFields.style.display = (costAnalysis === 'yes') ? 'block' : 'none';
     }
     
-    // Main calculation function
     function calculateQueue() {
-      // Read basic inputs
       const lambda = parseFloat(document.getElementById('lambda').value);
       const mu = parseFloat(document.getElementById('mu').value);
       const model = document.getElementById('model').value;
@@ -219,7 +256,7 @@
           alert("System is unstable (λ ≥ μ). Please enter values such that λ < μ.");
           return;
         }
-        // For M/M/1: Average Queue Length (L<sub>q</sub>) = ρ²/(1-ρ)
+        // For M/M/1: Lq = ρ²/(1-ρ)
         queueLength = (utilization * utilization) / (1 - utilization);
         waitingTime = queueLength / lambda;
         avgCustomers = queueLength;
@@ -236,15 +273,14 @@
           alert("System is unstable (λ ≥ s×μ). Please enter values such that λ < s×μ.");
           return;
         }
-        // Placeholder calculations for M/M/s:
-        queueLength = utilization * 10; // Simplified placeholder formula
+        // Placeholder formula for M/M/s:
+        queueLength = utilization * 10;
         waitingTime = queueLength / lambda;
         avgCustomers = queueLength;
         avgTime = waitingTime;
         probZero = 1 - utilization;
       }
       
-      // Calculate probability for n customers (Pₙ) assuming a simplified model
       const n = parseInt(document.getElementById('customers').value);
       if (!isNaN(n) && n >= 0) {
         probN = Math.pow(utilization, n) * (1 - utilization);
@@ -252,7 +288,6 @@
         probN = "Invalid input for n";
       }
       
-      // If cost analysis is enabled, calculate cost results
       if (costAnalysis === 'yes') {
         const serverCost = parseFloat(document.getElementById('serverCost').value);
         const waitingCost = parseFloat(document.getElementById('waitingCost').value);
@@ -264,9 +299,8 @@
           alert("Please enter a valid non-negative number for waiting cost");
           return;
         }
-        // For M/M/1, assume one server; for M/M/s, multiply by the number of servers.
         if (model === 'mm1') {
-          serverCostTotal = serverCost * 1;
+          serverCostTotal = serverCost;
         } else if (model === 'mms') {
           const s = parseInt(document.getElementById('servers').value);
           serverCostTotal = serverCost * s;
@@ -275,18 +309,15 @@
         totalCost = serverCostTotal + waitingCostTotal;
       }
       
-      // Display results with symbols and formatting
       document.getElementById('utilization').textContent = "Utilization (ρ): " + utilization.toFixed(2);
-      document.getElementById('queueLength').innerHTML = "Average Queue Length (L<sub>q</sub>): " + queueLength.toFixed(2);
-      document.getElementById('waitingTime').innerHTML = "Average Waiting Time (W<sub>q</sub>): " + waitingTime.toFixed(2);
+      document.getElementById('queueLength').innerHTML = "Average Queue Length (L₍q₎): " + queueLength.toFixed(2);
+      document.getElementById('waitingTime').innerHTML = "Average Waiting Time (W₍q₎): " + waitingTime.toFixed(2);
       document.getElementById('avgCustomers').innerHTML = "Average Number of Customers (L): " + avgCustomers.toFixed(2);
       document.getElementById('avgTime').innerHTML = "Average Time in System (W): " + avgTime.toFixed(2);
-      // Convert probabilities to percent with 2 decimal places
       document.getElementById('probZero').textContent = "Probability of 0 Customers (P₀): " + (probZero * 100).toFixed(2) + "%";
       document.getElementById('probN').textContent = "Probability of " + n + " Customers (Pₙ): " +
         (typeof(probN) === "number" ? (probN * 100).toFixed(2) + "%" : probN);
       
-      // Display cost results if applicable
       if (costAnalysis === 'yes') {
         document.getElementById('serverCostResult').textContent = "Server Cost: " + serverCostTotal.toFixed(2) + " per " + timeUnit;
         document.getElementById('waitingCostResult').textContent = "Waiting Cost: " + waitingCostTotal.toFixed(2) + " per " + timeUnit;
@@ -301,6 +332,76 @@
       }
       
       document.getElementById('results').style.display = 'block';
+    }
+    
+    function extractResultsExcel() {
+      const inputs = [
+        ["Parameter", "Value"],
+        ["Queueing Model", document.getElementById('model').value],
+        ["Cost Analysis", document.getElementById('cost').value],
+        ["Time Unit", document.getElementById('timeUnit').value],
+        ["λ (Arrival Rate)", document.getElementById('lambda').value],
+        ["μ (Service Rate)", document.getElementById('mu').value],
+        ["Number of Servers", document.getElementById('servers') ? document.getElementById('servers').value : ""],
+        ["Customers (n)", document.getElementById('customers').value],
+        ["Server Cost", document.getElementById('serverCost') ? document.getElementById('serverCost').value : ""],
+        ["Waiting Cost", document.getElementById('waitingCost') ? document.getElementById('waitingCost').value : ""]
+      ];
+      
+      const resultsData = [
+        ["Result", "Value"],
+        ["Utilization (ρ)", document.getElementById('utilization').innerText.replace("Utilization (ρ): ", "")],
+        ["Average Queue Length (Lq)", document.getElementById('queueLength').innerText.replace(/<[^>]*>/g, "")],
+        ["Average Waiting Time (Wq)", document.getElementById('waitingTime').innerText.replace(/<[^>]*>/g, "")],
+        ["Average Number of Customers (L)", document.getElementById('avgCustomers').innerText.replace(/<[^>]*>/g, "")],
+        ["Average Time in System (W)", document.getElementById('avgTime').innerText.replace(/<[^>]*>/g, "")],
+        ["Probability of 0 Customers (P₀)", document.getElementById('probZero').innerText.replace("Probability of 0 Customers (P₀): ", "")],
+        ["Probability of n Customers (Pₙ)", document.getElementById('probN').innerText.replace("Probability of ", "").replace(" Customers (Pₙ): ", "")]
+      ];
+      
+      const wb = XLSX.utils.book_new();
+      const wsInputs = XLSX.utils.aoa_to_sheet(inputs);
+      const wsResults = XLSX.utils.aoa_to_sheet(resultsData);
+      XLSX.utils.book_append_sheet(wb, wsInputs, "Inputs");
+      XLSX.utils.book_append_sheet(wb, wsResults, "Results");
+      XLSX.writeFile(wb, "WorkforceWizardResults.xlsx");
+    }
+    
+    function resetAll() {
+      document.getElementById('lambda').value = "";
+      document.getElementById('mu').value = "";
+      document.getElementById('customers').value = "";
+      if (document.getElementById('servers')) {
+        document.getElementById('servers').value = "";
+      }
+      if (document.getElementById('serverCost')) {
+        document.getElementById('serverCost').value = "";
+      }
+      if (document.getElementById('waitingCost')) {
+        document.getElementById('waitingCost').value = "";
+      }
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('utilization').innerText = "";
+      document.getElementById('queueLength').innerHTML = "";
+      document.getElementById('waitingTime').innerHTML = "";
+      document.getElementById('avgCustomers').innerHTML = "";
+      document.getElementById('avgTime').innerHTML = "";
+      document.getElementById('probZero').innerText = "";
+      document.getElementById('probN').innerText = "";
+      if (document.getElementById('serverCostResult')) {
+        document.getElementById('serverCostResult').innerText = "";
+      }
+      if (document.getElementById('waitingCostResult')) {
+        document.getElementById('waitingCostResult').innerText = "";
+      }
+      if (document.getElementById('totalCost')) {
+        document.getElementById('totalCost').innerText = "";
+      }
+    }
+    
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
   </script>
 </body>
